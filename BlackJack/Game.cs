@@ -15,72 +15,82 @@ namespace BlackJack
             Deck deck = new Deck();
 
             Game.GameRound(player, dealer, deck);
-            PlayAgain();
+
+            PlayAgain(player, dealer, deck);
         }
 
-        private static void PlayAgain()
+        private static void PlayAgain(Player player, Dealer dealer, Deck deck)
         {
             Console.WriteLine();
             Console.WriteLine("Would you like to play again? (Enter 'Y' or 'N'):");
-            var input = Console.ReadLine();
+
+            var input = Console.ReadLine().ToUpper();
 
             if(input == "Y")
             {
-                Console.Clear();
-                Game.GameRound(new Player(), new Dealer(), new Deck());
-                PlayAgain();
+                Console.Clear();   
+                             
+                deck.ShuffleDeck(deck);
+                player.EmptyHand();
+                dealer.EmptyHand();
+
+                Game.GameRound(player, dealer, deck);
+
+                PlayAgain(player, dealer, deck);
             }
         }
     }
 
     class Game
     {
-        public static bool GameRound(Player player, Dealer dealer, Deck deck)
+        public static int GameRound(Player player, Dealer dealer, Deck deck)
         {
-            if (Player.PlayerHand.Count == 0)
-                deck.FreshDeal();
+            if (player.PlayerHand.Count == 0 || dealer.PlayerHand.Count == 0)
+            {
+                deck.FreshDeal(player, dealer);
 
-            //If first two draws are Aces, it prevents getting busted with a 22.
-            if (Player.PlayerHand[0].Name == "A" && Player.PlayerHand[1].Name == "A" && Player.PlayerHand.Count == 2) { Ace.ReplaceAceValue("Player"); }
-            if (Dealer.DealerHand[0].Name == "A" && Dealer.DealerHand[1].Name == "A" && Dealer.DealerHand.Count == 2) { Ace.ReplaceAceValue("Dealer"); }
+                //If the first two draws are Aces, it prevents busting with a 22.
+                deck.AcesFirstTwoCards(player, dealer);
+            }            
 
-            Console.WriteLine($"Dealer's Cards: [{Dealer.DealerHand[0].Name}] [Hidden]");
+            Console.WriteLine($"Dealer's Cards: [{dealer.PlayerHand[0].Name}] [Hidden]");
             Console.Write("Player's Cards: ");
-            foreach (var card in Player.PlayerHand)
+
+            foreach (var card in player.PlayerHand)
             {
                 Console.Write($"[{card.Name}] ");
             }
-            Console.WriteLine($"Total: {Player.Count()}");
+
+            Console.WriteLine($"Total: {player.SumCardValues()}");
 
 
-            if(Player.Count() == 21)
+            if(player.SumCardValues() == 21)
             {
                 Console.WriteLine("BLACKJACK! You won!!");
-                return true;                
+                return 0;                
             }                        
 
-            if (Player.Count() > 21)
+            if (player.SumCardValues() > 21)
             {                
-                Console.WriteLine($"BUST! You lost with a total of {Player.Count()}..");
-                return false;
+                Console.WriteLine($"BUST! You lost with a total of {player.SumCardValues()}..");
+                return 0;
             }
 
             Console.Write("Stay or Hit? (Enter 'S' or 'H'): ");
 
-            var input = Console.ReadLine();
+            var input = Console.ReadLine().ToUpper();
 
             if (input == "S")
             {
-                var isBusted = Dealer.bustedToSeventeen();
-                if (isBusted == true)
+                if (dealer.didBustToSeventeen(dealer, deck) == true)
                 {
-                    Dealer.WonOrLossOutput("didBust");
-                    return true;
+                    dealer.WonOrLossOutput("dealerBust", dealer);
+                    return 0;
                 }
                 else
                 {
-                    var outcome = Game.DealerWon();
-                    Dealer.WonOrLossOutput(outcome);                    
+                    var outcome = Game.CompareHands(player, dealer);
+                    dealer.WonOrLossOutput(outcome, dealer);                    
                 }
                     
             }
@@ -88,11 +98,11 @@ namespace BlackJack
             if (input == "H")
             {
                 Console.Clear();
-                deck.PlayerDraw();
+                deck.PlayerDraw(player);
 
-                if(Player.Count() > 21 && Ace.IsAceInHand("Player"))
+                if(player.SumCardValues() > 21 && Ace.IsAceInHand(player))
                 {
-                    Ace.ReplaceAceValue("Player");
+                    Ace.ReplaceAceValue(player);
                     GameRound(player, dealer, deck);
                 }
                 else
@@ -101,18 +111,18 @@ namespace BlackJack
                 }
             }
 
-            return false;
+            return 0;
             
         }
 
-        public static string DealerWon()
+        public static string CompareHands(Player player, Dealer dealer)
         {
-            var dealerSum = Dealer.Count();
-            var playerSum = Player.Count();
+            var dealerSum = dealer.SumCardValues();
+            var playerSum = player.SumCardValues();
 
             if (dealerSum > playerSum && dealerSum < 22)
             {
-                return "won";
+                return "dealerWon";
             }
             if(dealerSum == playerSum)
             {
@@ -120,7 +130,7 @@ namespace BlackJack
             }
             else
             {
-                return "lowerScoreThanPlayer";
+                return "playerWon";
             }
         }
     }

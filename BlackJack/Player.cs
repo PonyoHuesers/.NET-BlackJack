@@ -6,17 +6,17 @@ using System.Threading.Tasks;
 
 namespace BlackJack
 {
-    class Player
+    class Player : IPlayer
     {
-        public static List<Cards> PlayerHand { get; set; }
-        public static int HandCount { get; set; } = 0;
+        public List<Cards> PlayerHand { get; set; }
+        public int HandCount { get; private set; } = 0;
 
         public Player()
         {
             PlayerHand = new List<Cards>();
         }
 
-        public static int Count()
+        public int SumCardValues()
         {
             HandCount = 0;
             foreach (var card in PlayerHand)
@@ -26,97 +26,106 @@ namespace BlackJack
 
             return HandCount;
         }
+
+        public void EmptyHand()
+        {
+            PlayerHand.Clear();
+        }
     }
 
-    class Dealer
+    class Dealer : IPlayer
     {
-        public static List<Cards> DealerHand { get; set; }
-        public static int HandCount { get; set; }
+        public List<Cards> PlayerHand { get; set; }
+        public int HandCount { get; private set; }
 
         public Dealer()
         {
-            DealerHand = new List<Cards>();
+            PlayerHand = new List<Cards>();
         }
 
-        public static int Count()
+        public int SumCardValues()
         {
             HandCount = 0;
-            foreach (var card in DealerHand)
+            foreach (var card in PlayerHand)
             {
                 HandCount += card.Value;
             }
 
             return HandCount;
         }
-
-        public static bool bustedToSeventeen()
+        
+        public bool didBustToSeventeen(Dealer dealer, Deck deck)
         {
-            while(Dealer.Count() <= 16)
+
+            while(dealer.SumCardValues() <= 16)
             {
-                Deck.DealerDraw();
+                deck.PlayerDraw(dealer);
             }
 
-            if (Dealer.Count() < 22)
+            if (Ace.IsAceInHand(dealer))
             {
-                return false;
-            }                
-            else
-            {
-                if (Ace.IsAceInHand("Dealer"))
-                {
-                    Ace.ReplaceAceValue("Dealer");
-                    bustedToSeventeen();
-                }               
+                Ace.ReplaceAceValue(dealer);
+                didBustToSeventeen(dealer, deck);
+            }
 
+            if (dealer.SumCardValues() > 21)
+            {
                 return true;
-            }            
+            }
+
+            return false;            
         }
 
-        public static void WonOrLossOutput(string outcome)
+        public void EmptyHand()
         {
-            if(outcome == "didBust")
+            PlayerHand.Clear();
+        }
+
+        public void WonOrLossOutput(string outcome, Dealer dealer)
+        {
+            if(outcome == "dealerBust")
             {
                 Console.WriteLine();
                 Console.WriteLine("Dealer busted! You win!!");
                 Console.Write("Dealer's Cards: ");
-                foreach (var card in Dealer.DealerHand)
+                foreach (var card in dealer.PlayerHand)
                 {
                     Console.Write($"[{card.Name}] ");
                 }
-                Console.WriteLine("Total: " + Dealer.Count());
+                Console.WriteLine("Total: " + dealer.SumCardValues());
             }
-            if(outcome == "lowerScoreThanPlayer")
+            if(outcome == "playerWon")
             {
                 Console.WriteLine();
                 Console.WriteLine("Your score beat out the Dealer! You win!!");
                 Console.Write("Dealer's Cards: ");
-                foreach (var card in Dealer.DealerHand)
+                foreach (var card in dealer.PlayerHand)
                 {
                     Console.Write($"[{card.Name}] ");
                 }
-                Console.WriteLine("Total: " + Dealer.Count());
+                Console.WriteLine("Total: " + dealer.SumCardValues());
             }
             if(outcome == "tie")
             {
                 Console.WriteLine();
                 Console.WriteLine("Oh dear... Split pot.");
                 Console.Write("Dealer's Cards: ");
-                foreach (var card in Dealer.DealerHand)
+                foreach (var card in dealer.PlayerHand)
                 {
                     Console.Write($"[{card.Name}] ");
                 }
-                Console.WriteLine("Total: " + Dealer.Count());
+                Console.WriteLine("Total: " + dealer.SumCardValues());
             }
-            if(outcome == "won")
+            if(outcome == "dealerWon")
             {
                 Console.WriteLine();
                 Console.WriteLine("The Dealer won...");
                 Console.Write("Dealer's Cards: ");
-                foreach (var card in Dealer.DealerHand)
+                foreach (var card in dealer.PlayerHand)
                 {
                     Console.Write($"[{card.Name}] ");
                 }
-                Console.WriteLine("Total: " + Dealer.Count());
+                Console.WriteLine("Total: " + dealer.SumCardValues());
             }
         }
     }

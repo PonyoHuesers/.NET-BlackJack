@@ -8,7 +8,7 @@ namespace BlackJack
 {
     class Deck
     {
-        public static List<Cards> DeckList { get; set; }
+        public List<Cards> DeckList { get; set; }
         private static readonly Random _random = new Random();
         private readonly Dictionary<int, string> _nameLookup = new Dictionary<int, string>
         {
@@ -52,49 +52,55 @@ namespace BlackJack
             
         }
 
-        public void FreshDeal()
+        public void FreshDeal(Player player, Dealer dealer)
         {
             for (int i = 0; i < 2; i++)
             {
-                PlayerDraw();
-                DealerDraw();
+                PlayerDraw(player);
+                PlayerDraw(dealer);
             }
-
-            //Code below used for testing with first two draws being Aces
-            //
-            //PlayerDraw();
-            //Dealer.DealerHand.Add(DeckList[50]);
-            //PlayerDraw();
-            //Dealer.DealerHand.Add(DeckList[51]);
-            //DeckList[50].IsDrawn = true;
-            //DeckList[51].IsDrawn = true;
         }
 
-        public void PlayerDraw()
+        public void PlayerDraw(IPlayer player)
         {
             var drawnCard = DeckList[_random.Next(52)];
             if (drawnCard.IsDrawn)
             {
-                PlayerDraw();
+                PlayerDraw(player);
             }
             else
             {
-                Player.PlayerHand.Add(drawnCard);
+                player.PlayerHand.Add(drawnCard);
                 drawnCard.IsDrawn = true;
             }
         }
 
-        public static void DealerDraw()
+        public void ShuffleDeck(Deck deck)
         {
-            var drawnCard = DeckList[_random.Next(52)];
-            if (drawnCard.IsDrawn)
+            foreach (var card in DeckList)
             {
-                DealerDraw();
+                if(card.IsDrawn == true)
+                {
+                    card.IsDrawn = false;
+                }
+                if(card is Ace && card.IsMaxValue == false)
+                {
+                    card.Value = 11;
+                    card.IsMaxValue = true;
+                }                
             }
-            else
+        }
+
+        public void AcesFirstTwoCards(Player player, Dealer dealer)
+        {
+            if (player.PlayerHand[0].Name == "A" && player.PlayerHand[1].Name == "A")
             {
-                Dealer.DealerHand.Add(drawnCard);
-                drawnCard.IsDrawn = true;
+                Ace.ReplaceAceValue(player);
+            }
+
+            if (dealer.PlayerHand[0].Name == "A" && dealer.PlayerHand[1].Name == "A")
+            {
+                Ace.ReplaceAceValue(dealer);
             }
         }
     }

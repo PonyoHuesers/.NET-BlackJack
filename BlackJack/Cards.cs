@@ -19,46 +19,22 @@ namespace BlackJack
         public override int Value { get; set; } = 11;
         public override bool IsMaxValue { get; set; } = true;
 
-        public static bool IsAceInHand(string player)
+        public static bool IsAceInHand(IPlayer player)
         {
-            if(player == "Player")
+            foreach (Cards card in player.PlayerHand)
             {
-                foreach (Cards card in Player.PlayerHand)
-                {
-                    if (card.Name == "A" && card.IsMaxValue == true)
-                        return true;
-                }
-
-                return false;
+                if (card.Name == "A" && card.IsMaxValue == true)
+                    return true;
             }
-            else
-            {
-                foreach (Cards card in Dealer.DealerHand)
-                {
-                    if (card.Name == "A" && card.IsMaxValue == true)
-                        return true;
-                }
 
-                return false;
-            }
-            
+            return false;
         }
 
-        public static void ReplaceAceValue(string player)
+        public static void ReplaceAceValue(IPlayer player)
         {
-            if(player == "Player")
-            {
-                Ace firstAce = (Ace)Player.PlayerHand.First(c => c.Name == "A" && c.IsMaxValue == true);
-                firstAce.Value = 1;
-                firstAce.IsMaxValue = false;
-            }
-            else
-            {
-                Ace firstAce = (Ace)Dealer.DealerHand.First(c => c.Name == "A" && c.IsMaxValue == true);
-                firstAce.Value = 1;
-                firstAce.IsMaxValue = false;
-            }
-            
+            Ace firstAce = (Ace)player.PlayerHand.First(c => c.Name == "A" && c.IsMaxValue == true);
+            firstAce.Value = 1;
+            firstAce.IsMaxValue = false;            
         }
     }
 }
