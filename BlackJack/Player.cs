@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BlackJack
 {
@@ -19,7 +16,7 @@ namespace BlackJack
         public int SumCardValues()
         {
             HandCount = 0;
-            foreach (var card in PlayerHand)
+            foreach (Cards card in PlayerHand)
             {
                 HandCount += card.Value;
             }
@@ -46,7 +43,7 @@ namespace BlackJack
         public int SumCardValues()
         {
             HandCount = 0;
-            foreach (var card in PlayerHand)
+            foreach (Cards card in PlayerHand)
             {
                 HandCount += card.Value;
             }
@@ -62,7 +59,7 @@ namespace BlackJack
                 deck.PlayerDraw(dealer);
             }
 
-            if (Ace.IsAceInHand(dealer))
+            if (Ace.IsAceInHand(dealer) && dealer.SumCardValues() > 21)
             {
                 Ace.ReplaceAceValue(dealer);
                 didBustToSeventeen(dealer, deck);
@@ -83,12 +80,14 @@ namespace BlackJack
 
         public void WonOrLossOutput(string outcome, Dealer dealer)
         {
+            Console.WriteLine();
+
             if(outcome == "dealerBust")
             {
                 Console.WriteLine();
                 Console.WriteLine("Dealer busted! You win!!");
                 Console.Write("Dealer's Cards: ");
-                foreach (var card in dealer.PlayerHand)
+                foreach (Cards card in dealer.PlayerHand)
                 {
                     Console.Write($"[{card.Name}] ");
                 }
@@ -99,7 +98,7 @@ namespace BlackJack
                 Console.WriteLine();
                 Console.WriteLine("Your score beat out the Dealer! You win!!");
                 Console.Write("Dealer's Cards: ");
-                foreach (var card in dealer.PlayerHand)
+                foreach (Cards card in dealer.PlayerHand)
                 {
                     Console.Write($"[{card.Name}] ");
                 }
@@ -110,7 +109,7 @@ namespace BlackJack
                 Console.WriteLine();
                 Console.WriteLine("Oh dear... Split pot.");
                 Console.Write("Dealer's Cards: ");
-                foreach (var card in dealer.PlayerHand)
+                foreach (Cards card in dealer.PlayerHand)
                 {
                     Console.Write($"[{card.Name}] ");
                 }
@@ -121,7 +120,7 @@ namespace BlackJack
                 Console.WriteLine();
                 Console.WriteLine("The Dealer won...");
                 Console.Write("Dealer's Cards: ");
-                foreach (var card in dealer.PlayerHand)
+                foreach (Cards card in dealer.PlayerHand)
                 {
                     Console.Write($"[{card.Name}] ");
                 }

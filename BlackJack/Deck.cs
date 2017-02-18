@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BlackJack
 {
@@ -30,8 +27,8 @@ namespace BlackJack
             {
                 for(int cardValue = 2; cardValue < 15; cardValue++)
                 {
-                    var name = cardValue > 10 ? _nameLookup[cardValue] : cardValue.ToString();
-                    var value = cardValue > 10 ? 10 : cardValue;
+                    string name = cardValue > 10 ? _nameLookup[cardValue] : cardValue.ToString();
+                    int value = cardValue > 10 ? 10 : cardValue;
                     deckList.Add(new Cards { Name = name, Value = value });
                 }
             }
@@ -63,7 +60,7 @@ namespace BlackJack
 
         public void PlayerDraw(IPlayer player)
         {
-            var drawnCard = DeckList[_random.Next(52)];
+            Cards drawnCard = DeckList[_random.Next(52)];
             if (drawnCard.IsDrawn)
             {
                 PlayerDraw(player);
@@ -75,9 +72,9 @@ namespace BlackJack
             }
         }
 
-        public void ShuffleDeck(Deck deck)
+        public void ShuffleDeck()
         {
-            foreach (var card in DeckList)
+            foreach (Cards card in DeckList)
             {
                 if(card.IsDrawn == true)
                 {

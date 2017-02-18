@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+//Future plans:
+//Add split command for duplicate initial cards
+//Perhaps add chips for betting?
+//Add scoring system to tally your wins vs. dealer's
 
 namespace BlackJack
 {
@@ -22,15 +23,15 @@ namespace BlackJack
         private static void PlayAgain(Player player, Dealer dealer, Deck deck)
         {
             Console.WriteLine();
-            Console.WriteLine("Would you like to play again? (Enter 'Y' or 'N'):");
+            Console.WriteLine("Would you like to play again? (Enter 'Y' or 'N'): ");
 
-            var input = Console.ReadLine().ToUpper();
+            char input = Game.CollectValidInput("Yes or No");
 
-            if(input == "Y")
+            if (input == 'Y')
             {
                 Console.Clear();   
                              
-                deck.ShuffleDeck(deck);
+                deck.ShuffleDeck();
                 player.EmptyHand();
                 dealer.EmptyHand();
 
@@ -56,7 +57,7 @@ namespace BlackJack
             Console.WriteLine($"Dealer's Cards: [{dealer.PlayerHand[0].Name}] [Hidden]");
             Console.Write("Player's Cards: ");
 
-            foreach (var card in player.PlayerHand)
+            foreach (Cards card in player.PlayerHand)
             {
                 Console.Write($"[{card.Name}] ");
             }
@@ -77,10 +78,11 @@ namespace BlackJack
             }
 
             Console.Write("Stay or Hit? (Enter 'S' or 'H'): ");
+            
 
-            var input = Console.ReadLine().ToUpper();
+            char input = Game.CollectValidInput("Stay or Hit");
 
-            if (input == "S")
+            if (input == 'S')
             {
                 if (dealer.didBustToSeventeen(dealer, deck) == true)
                 {
@@ -89,13 +91,13 @@ namespace BlackJack
                 }
                 else
                 {
-                    var outcome = Game.CompareHands(player, dealer);
+                    string outcome = Game.CompareHands(player, dealer);
                     dealer.WonOrLossOutput(outcome, dealer);                    
                 }
                     
             }
 
-            if (input == "H")
+            if (input == 'H')
             {
                 Console.Clear();
                 deck.PlayerDraw(player);
@@ -117,8 +119,8 @@ namespace BlackJack
 
         public static string CompareHands(Player player, Dealer dealer)
         {
-            var dealerSum = dealer.SumCardValues();
-            var playerSum = player.SumCardValues();
+            int dealerSum = dealer.SumCardValues();
+            int playerSum = player.SumCardValues();
 
             if (dealerSum > playerSum && dealerSum < 22)
             {
@@ -132,6 +134,37 @@ namespace BlackJack
             {
                 return "playerWon";
             }
+        }
+
+        public static char CollectValidInput(string acceptedInput)
+        {
+            char char1;
+            char char2;
+
+            if (acceptedInput == "Stay or Hit")
+            {
+                char1 = 'S';
+                char2 = 'H';
+            }
+            else
+            {
+                char1 = 'Y';
+                char2 = 'N';
+                acceptedInput = "Would you like to play again";
+            }
+
+            char input = Console.ReadKey().KeyChar;
+            input = char.ToUpper(input);
+
+            while (input != char1 && input != char2)
+            {
+                Console.Write($"\n\nSorry, that was an invalid option! Try again using '{char1}' or '{char2}' .\n");
+                Console.Write($"{acceptedInput}? (Enter '{char1}' or '{char2}'): ");
+                input = Console.ReadKey().KeyChar;
+                input = char.ToUpper(input);
+            }
+
+            return input;
         }
     }
 }
