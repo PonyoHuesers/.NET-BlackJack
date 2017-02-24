@@ -7,6 +7,7 @@ namespace BlackJack
     {
         public List<Cards> PlayerHand { get; set; }
         public int HandCount { get; private set; } = 0;
+        public int RoundScore { get; set; } = 0;
 
         public Player()
         {
@@ -34,6 +35,7 @@ namespace BlackJack
     {
         public List<Cards> PlayerHand { get; set; }
         public int HandCount { get; private set; }
+        public int RoundScore { get; set; } = 0;
 
         public Dealer()
         {

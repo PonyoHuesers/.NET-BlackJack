@@ -3,7 +3,6 @@
 //Future plans:
 //Add split command for duplicate initial cards
 //Perhaps add chips for betting?
-//Add scoring system to tally your wins vs. dealer's
 
 namespace BlackJack
 {
@@ -12,7 +11,7 @@ namespace BlackJack
         static void Main()
         {
             Player player = new Player();
-            Dealer dealer = new Dealer();                        
+            Dealer dealer = new Dealer();
             Deck deck = new Deck();
 
             Game.GameRound(player, dealer, deck);
@@ -23,11 +22,11 @@ namespace BlackJack
         private static void PlayAgain(Player player, Dealer dealer, Deck deck)
         {
             Console.WriteLine();
-            Console.WriteLine("Would you like to play again? (Enter 'Y' or 'N'): ");
+            Console.Write("Would you like to play again? (Enter 'Y' or 'N'): ");
 
             char input = Game.CollectValidInput("Yes or No");
 
-            if (input == 'Y')
+            if(input == 'Y')
             {
                 Console.Clear();   
                              
@@ -38,6 +37,14 @@ namespace BlackJack
                 Game.GameRound(player, dealer, deck);
 
                 PlayAgain(player, dealer, deck);
+            }
+            else
+            {
+                double playerWinPercent = 100 * ((double)player.RoundScore / (player.RoundScore + dealer.RoundScore));
+                double dealerWinPercent = 100 * ((double)dealer.RoundScore / (player.RoundScore + dealer.RoundScore));
+
+                Console.WriteLine($"\n\nPlayer wins: {player.RoundScore}             Dealer wins: {dealer.RoundScore}");
+                Console.WriteLine($"Win percent: {Math.Round(playerWinPercent, 2)}%         Win percent: {Math.Round(dealerWinPercent, 2)}%");
             }
         }
     }
@@ -68,12 +75,14 @@ namespace BlackJack
             if(player.SumCardValues() == 21)
             {
                 Console.WriteLine("BLACKJACK! You won!!");
+                player.RoundScore += 1;
                 return 0;                
             }                        
 
             if (player.SumCardValues() > 21)
-            {                
+            {                                
                 Console.WriteLine($"BUST! You lost with a total of {player.SumCardValues()}..");
+                dealer.RoundScore += 1;
                 return 0;
             }
 
@@ -86,6 +95,7 @@ namespace BlackJack
             {
                 if (dealer.didBustToSeventeen(dealer, deck) == true)
                 {
+                    player.RoundScore += 1;
                     dealer.WonOrLossOutput("dealerBust", dealer);
                     return 0;
                 }
@@ -124,14 +134,18 @@ namespace BlackJack
 
             if (dealerSum > playerSum && dealerSum < 22)
             {
+                dealer.RoundScore += 1;
                 return "dealerWon";
             }
             if(dealerSum == playerSum)
             {
+                player.RoundScore += 1;
+                dealer.RoundScore += 1;
                 return "tie";
             }
             else
             {
+                player.RoundScore += 1;
                 return "playerWon";
             }
         }
